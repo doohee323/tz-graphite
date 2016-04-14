@@ -4,7 +4,6 @@
 require_relative './bootstrap'
 
 Vagrant.configure("2") do |config|
-
 ###for linode provider
     config.vm.provider :linode do |provider, override|
       config.ssh.private_key_path = '~/.ssh/id_rsa'
@@ -19,10 +18,9 @@ Vagrant.configure("2") do |config|
     end
 
 config.vm.box = "precise64"
-
   #for virtual box
    config.vm.provider :virtualbox do |provider, override|
-        override.vm.box = "precise64"
+        override.vm.box = "ubuntu/trusty64"
         override.vm.hostname = "graphite"
         override.vm.network :private_network, ip: "192.168.0.5"
         override.vm.provision "shell", :path => File.join(File.dirname(__FILE__),"scripts/graphite.sh")

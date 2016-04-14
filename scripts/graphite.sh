@@ -10,16 +10,17 @@ source /vagrant/setup.rc
 # INSTALL KEEPALIVED
 #
 ##########################################
-sudo apt-get install keepalived -y
+#sudo apt-get install keepalived -y
 
-echo 1 > /proc/sys/net/ipv4/ip_nonlocal_bind
-echo "net.ipv4.ip_nonlocal_bind=1" >> /etc/sysctl.conf
-sysctl -p
+#echo 1 > /proc/sys/net/ipv4/ip_nonlocal_bind
+#echo "net.ipv4.ip_nonlocal_bind=1" >> /etc/sysctl.conf
+#sysctl -p
 
-cp /vagrant/etc/keepalived/keepalived.conf /etc/keepalived/
+#cp /vagrant/etc/keepalived/keepalived.conf /etc/keepalived/
+#sed -i "s/%PRIORITY%/100/g" /etc/keepalived/keepalived.conf
 
-sed -i "s/%PASSWORD%/$cfg_keepalivepassword/g" /etc/keepalived/keepalived.conf
-sed -i "s/%GRAPHITEHOME%/$cfg_graphitehome/g" /etc/keepalived/keepalived.conf
+#sed -i "s/%PASSWORD%/$cfg_keepalivepassword/g" /etc/keepalived/keepalived.conf
+#sed -i "s/%GRAPHITEHOME%/$cfg_graphitehome/g" /etc/keepalived/keepalived.conf
 
 ##########################################
 #
@@ -32,8 +33,9 @@ sed -i "s/%GRAPHITEHOME%/$cfg_graphitehome/g" /etc/keepalived/keepalived.conf
 # INSTALL HAPROXY
 #
 ##########################################
-sudo apt-get install haproxy -y
-
+apt-get -y update
+apt-get -y upgrade
+apt-get install haproxy -y
 
 #copy config
 
@@ -78,10 +80,9 @@ stop statsdaemon
 start statsdaemon
 
 #configure keepalived for this node
-sed -i "s/%PRIORITY%/100/g" /etc/keepalived/keepalived.conf
 service rsyslog restart
-service keepalived stop
-service keepalived start
+#service keepalived stop
+#service keepalived start
 service haproxy stop
 service haproxy start
 
@@ -116,7 +117,7 @@ echo "CARBONLINK_HOSTS = [\"127.0.0.1:7102:1\", \"127.0.0.1:7202:2\"]" >> /opt/g
 #install website
 easy_install python-memcached
 #modify webapp a bit
-echo "CLUSTER_SERVERS = [\"$cfg_ip_carbon1:80\", \"$cfg_ip_carbon2:80\",\"$cfg_ip_carbon3:80\", \"$cfg_ip_carbon4:80\"]" >> /opt/graphite/webapp/graphite/local_settings.py
+echo "CLUSTER_SERVERS = [\"$cfg_ip_carbon1:80\", \"$cfg_ip_carbon2:80\"]" >> /opt/graphite/webapp/graphite/local_settings.py
 echo "MEMCACHE_HOSTS = [\"$cfg_ip_memcache1:11211\", \"$cfg_ip_memcache2:11211\"]" >> /opt/graphite/webapp/graphite/local_settings.py
 #end website
 
