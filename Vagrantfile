@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
       override.vm.box = 'linode'
       override.vm.box_url = "https://github.com/displague/vagrant-linode/raw/master/box/linode.box"
       provider.api_key = 'uGVMNzK03N1D601dRpecduLmoGDiAINiWy4qswMoiQJoxFfJn27GV5At4QYOfXgN'
-      provider.distribution = 'Ubuntu 12.04 LTS'
+      provider.distribution = 'Ubuntu 14.04 LTS'
       provider.datacenter = 'fremont'
       provider.plan = 'Linode 2048'
       provider.label = "graphite"
