@@ -1,3 +1,5 @@
+# http://blog.naver.com/PostView.nhn?blogId=sckim007&logNo=220668631882&parentCategoryNo=&categoryNo=&viewDate=&isShowPopularPosts=false&from=postView
+
 sudo su
 set -x
 export DEBIAN_FRONTEND=noninteractive
@@ -5,152 +7,77 @@ export DEBIAN_FRONTEND=noninteractive
 echo "Reading config...." >&2
 source /vagrant/setup.rc
 
-##########################################
-#
-# INSTALL KEEPALIVED
-#
-##########################################
-#sudo apt-get install keepalived -y
+sudo apt-get update
+sudo apt-get install graphite-web -y
+sudo DEBIAN_FRONTEND=noninteractive apt-get -q -y --force-yes install graphite-carbon
+sudo apt-get install postgresql -y
+sudo apt-get install libpq-dev -y
+sudo apt-get install python-psycopg2 -y
 
-#echo 1 > /proc/sys/net/ipv4/ip_nonlocal_bind
-#echo "net.ipv4.ip_nonlocal_bind=1" >> /etc/sysctl.conf
-#sysctl -p
+sudo cp -Rf /vagrant/resources/postgresql/9.3/main/pg_hba.conf /etc/postgresql/9.3/main/pg_hba.conf
+#local   all             postgres                                trust
+#local   all             all                                     trust
+#host    all             all             127.0.0.1/32            trust
+#host    all             all             ::1/128                 trust
 
-#cp /vagrant/etc/keepalived/keepalived.conf /etc/keepalived/
-#sed -i "s/%PRIORITY%/100/g" /etc/keepalived/keepalived.conf
+sudo cp -Rf /vagrant/resources/postgresql/9.3/main/init.sql /etc/postgresql/9.3/main/init.sql
+#CREATE USER graphite WITH PASSWORD 'wkfgkwk';
+#CREATE DATABASE graphite WITH OWNER graphite;
 
-#sed -i "s/%PASSWORD%/$cfg_keepalivepassword/g" /etc/keepalived/keepalived.conf
-#sed -i "s/%GRAPHITEHOME%/$cfg_graphitehome/g" /etc/keepalived/keepalived.conf
+sudo service postgresql restart
 
-##########################################
-#
-# END INSTALL KEEPALIVED
-#
-##########################################
+sudo psql -h localhost -U postgres -a -w -f /etc/postgresql/9.3/main/init.sql
 
-##########################################
-#
-# INSTALL HAPROXY
-#
-##########################################
-apt-get -y update
-apt-get -y upgrade
-apt-get install haproxy -y
+#psql -h localhost -U postgres
+#postgres=# \l
+#                                  List of databases
+#   Name    |  Owner   | Encoding |   Collate   |    Ctype    |   Access privileges
+#-----------+----------+----------+-------------+-------------+-----------------------
+# graphite  | graphite | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+# \q
 
-#copy config
+sudo cp -Rf /vagrant/resources/graphite/local_settings.py /etc/graphite/local_settings.py
 
-cp /vagrant/etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg 
+#SECRET_KEY = 'wkfgkwk'
+#USE_REMOTE_USER_AUTHENTICATION = True
+#DATABASES = {
+#    'default': {
+#        'NAME': 'graphite',
+#        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#        'USER': 'graphite',
+#        'PASSWORD': 'wkfgkwk',
+#        'HOST': '127.0.0.1',
+#        'PORT': ''
+#    }
+#}
 
-sed -i "s/RELAY1/$cfg_ip_relay1/g" /etc/haproxy/haproxy.cfg
-sed -i "s/RELAY2/$cfg_ip_relay2/g" /etc/haproxy/haproxy.cfg
-sed -i "s/WEB1/$cfg_ip_web1/g" /etc/haproxy/haproxy.cfg
-sed -i "s/WEB2/$cfg_ip_web2/g" /etc/haproxy/haproxy.cfg
-sed -i "s/SITE1/$cfg_ip_site1/g" /etc/haproxy/haproxy.cfg
-sed -i "s/SITE2/$cfg_ip_site2/g" /etc/haproxy/haproxy.cfg
+sudo graphite-manage syncdb --noinput
 
-sed -i 's/#$ModLoad imudp/$ModLoad imudp/g' /etc/rsyslog.conf
-sed -i 's/#$UDPServerAddress 127.0.0.1/$UDPServerAddress 127.0.0.1/g' /etc/rsyslog.conf
-sed -i 's/#$UDPServerRun 514/$UDPServerRun 514/g' /etc/rsyslog.conf
+sudo sed -i "s/CARBON_CACHE_ENABLED=false/CARBON_CACHE_ENABLED=true/g" /etc/default/graphite-carbon
 
-cat  << 'EOF' > /etc/rsyslog.d/haproxy.conf
-if ($programname == 'haproxy') then -/var/log/haproxy.log
-EOF
+sudo sed -i "s/ENABLE_LOGROTATION = False/ENABLE_LOGROTATION = True/g" /etc/carbon/carbon.conf
 
-sed -i "s/ENABLED=0/ENABLED=1/g" /etc/default/haproxy
+sudo cp -Rf /vagrant/resources/carbon/storage-schemas.conf /etc/carbon/storage-schemas.conf
+#[test]
+#pattern = ^test₩.
+#retentions = 10s:10m,1m:1h,10m:1d
 
-##########################################
-#
-# END INSTALL HAPROXY
-#
-##########################################
+sudo cp /usr/share/doc/graphite-carbon/examples/storage-aggregation.conf.example /etc/carbon/storage-aggregation.conf
+#sudo vi /etc/carbon/storage-aggregation.conf
 
-############################################
-#
-# install statsD 
-#
-############################################
+sudo service carbon-cache start
+sudo apt-get install apache2 libapache2-mod-wsgi -y
+sudo a2dissite 000-default # disable default virtual host
+sudo cp /usr/share/graphite-web/apache2-graphite.conf /etc/apache2/sites-available
+sudo a2ensite apache2-graphite # enable virtual host
+sudo service apache2 reload
 
-dpkg -i /vagrant/statsdaemon.deb
-#get conf file
-cp /vagrant/etc/init/statsdaemon.conf /etc/init
+echo "test.count 4 `date +%s`" | nc -q0 127.0.0.1 2003
+sleep 10
+echo "test.count 8 `date +%s`" | nc -q0 127.0.0.1 2003
+sleep 10
+echo "test.count 100 `date +%s`" | nc -q0 127.0.0.1 2003
 
-sed -i "s/%GRAPHITEHOME%/$cfg_graphitehome/g" /etc/init/statsdaemon.conf
+#curl http://192.168.82.170/render?target=test.count&format=json
 
-stop statsdaemon
-start statsdaemon
-
-#configure keepalived for this node
-service rsyslog restart
-#service keepalived stop
-#service keepalived start
-service haproxy stop
-service haproxy start
-
-#build base 
-source /vagrant/scripts/graphite_base.sh
-sudo -u graphite python /opt/graphite/bin/carbon-cache.py stop
-sudo -u graphite python /opt/graphite/bin/carbon-relay.py stop
-service postgresql stop
-service apache2 stop
-
-#install memcached while there
-apt-get install memcached
-
-#install relay stuff
-cp /vagrant/opt/graphite/conf/carbon.conf /opt/graphite/conf/carbon.conf
-sed -i "s/CARBON1/$cfg_ip_carbon1/g" /opt/graphite/conf/carbon.conf
-sed -i "s/CARBON2/$cfg_ip_carbon2/g" /opt/graphite/conf/carbon.conf
-sed -i "s/SITE1/$cfg_ip_site1/g" /opt/graphite/conf/carbon.conf
-sed -i "s/SITE2/$cfg_ip_site2/g" /opt/graphite/conf/carbon.conf
-
-cp /vagrant/etc/init.d/* /etc/init.d/
-chmod 777 /etc/init.d/carbon-*
-
-/etc/init.d/carbon-storage stop
-/etc/init.d/carbon-storage start
-/etc/init.d/carbon-relay stop
-/etc/init.d/carbon-relay start
-
-echo "CARBONLINK_HOSTS = [\"127.0.0.1:7102:1\", \"127.0.0.1:7202:2\"]" >> /opt/graphite/webapp/graphite/local_settings.py
-#end carbon
-
-#install website
-easy_install python-memcached
-#modify webapp a bit
-echo "CLUSTER_SERVERS = [\"$cfg_ip_carbon1:80\", \"$cfg_ip_carbon2:80\"]" >> /opt/graphite/webapp/graphite/local_settings.py
-echo "MEMCACHE_HOSTS = [\"$cfg_ip_memcache1:11211\", \"$cfg_ip_memcache2:11211\"]" >> /opt/graphite/webapp/graphite/local_settings.py
-#end website
-
-#install ganglia
-#using this repo to install ganglia 3.4 as it allows for host name overwrites
-add-apt-repository ppa:rufustfirefly/ganglia
-# Update and begin installing some utility tools
-apt-get -y update
-apt-get install ganglia-monitor -y
-
-cp /vagrant/etc/ganglia/gmond.conf /etc/ganglia/gmond.conf
-sed -i "s/MONITORNODE/$cfg_ganglia_server/g" /etc/ganglia/gmond.conf
-sed -i "s/THISNODEID/graphite1/g" /etc/ganglia/gmond.conf
-/etc/init.d/ganglia-monitor restart
-
-service postgresql start
-service apache2 start
-
-#apply firewall rules
-mkdir -p /etc/iptables
-cp /vagrant/etc/iptables/rules /etc/iptables/rules
-
-sed -i "s/^iptables-restore//g" /etc/network/if-up.d/iptables
-echo "iptables-restore < /etc/iptables/rules" >> /etc/network/if-up.d/iptables
-iptables-restore < /etc/iptables/rules
-
-
-#install failtoban
-apt-get install fail2ban sendmail -y
-cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
-sed -i "s/^destemail.*/destemail = andrewy@lasdorf.com/g" /etc/fail2ban/jail.local
-sed -i "s/^action = %(action_)s/action = %(action_mwl)s/g" /etc/fail2ban/jail.local
-service fail2ban stop
-service fail2ban start
-service rsyslog restart
-echo "done!"
+exit 0;

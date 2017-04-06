@@ -5,6 +5,7 @@ echo "Making Base...." >&2
 source /vagrant/setup.rc
 
 export DEBIAN_FRONTEND=noninteractive
+
 # Update and begin installing some utility tools
 apt-get -y update
 apt-get -y upgrade
@@ -58,9 +59,10 @@ git clone https://github.com/graphite-project/graphite-web.git
 cd graphite-web
 python setup.py install
 
-# Install carbon and graphite deps 
+# Install carbon and graphite deps
+sudo rm -Rf /tmp/graphite_reqs.txt 
 cat >> /tmp/graphite_reqs.txt << EOF
-Django==1.5
+Django==1.9
 python-memcached==1.47
 txAMQP==0.4
 simplejson==2.1.6
@@ -77,25 +79,26 @@ sudo pip install -r /tmp/graphite_reqs.txt
 
 python check-dependencies.py
 
-rm /etc/apache2/sites-enabled/*
-cp /vagrant/etc/apache2/sites-enabled/graphite.wsgi /opt/graphite/conf
-cp /vagrant/etc/apache2/sites-enabled/graphite.conf /etc/apache2/sites-enabled
+sudo cp /vagrant/etc/apache2/sites-enabled/graphite.wsgi /opt/graphite/conf
+rm -Rf /etc/apache2/sites-enabled/*
+sudo cp /vagrant/etc/apache2/sites-enabled/graphite.conf /etc/apache2/sites-enabled
 
 cd ..
 #rm -rf graphite-web
 
 cd /opt/graphite/webapp/graphite
-cp local_settings.py.example local_settings.py
+sudo cp local_settings.py.example local_settings.py
 
-sed -i "s/SECRET_KEY = 'UNSAFE_DEFAULT'/SECRET_KEY = 'a_salty_string'/g" /opt/graphite/webapp/graphite/settings.py
-sed -i "s/LOG_DIR = STORAGE_DIR \+ 'log\/webapp\/'/LOG_DIR = '\/var\/log\/apache2\/'/g" /opt/graphite/webapp/graphite/settings.py
+sudo sed -i "s/SECRET_KEY = 'UNSAFE_DEFAULT'/SECRET_KEY = 'a_salty_string'/g" /opt/graphite/webapp/graphite/settings.py
+sudo sed -i "s/LOG_DIR = STORAGE_DIR \+ 'log\/webapp\/'/LOG_DIR = '\/var\/log\/apache2\/'/g" /opt/graphite/webapp/graphite/settings.py
 
 cd /opt/graphite/conf
 
-mkdir examples
-mv *.example examples/
+sudo rm -Rf examples
+sudo mkdir examples
+sudo mv *.example examples/
 
-cp examples/carbon.conf.example carbon.conf
+sudo cp examples/carbon.conf.example carbon.conf
 #cp storage-schemas.conf.example storage-schemas.conf
 
 cat  << 'EOF' > /opt/graphite/conf/storage-schemas.conf
