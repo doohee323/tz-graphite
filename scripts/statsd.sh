@@ -35,11 +35,8 @@ sudo service statsd start
 
 #echo "metric_name:metric_value|type_specification" | nc -u -w0 127.0.0.1 8125
 echo "sample.gauge:16|g" | nc -u -w0 127.0.0.1 8125 
-sleep 10
 echo "sample.gauge:10|g" | nc -u -w0 127.0.0.1 8125  
-sleep 10
 echo "sample.gauge:18|g" | nc -u -w0 127.0.0.1 8125 
-sleep 10
 echo "sample.gauge:18|g" | nc -u -w0 127.0.0.1 8125 
 
 echo "sample.set:50|s" | nc -u -w0 127.0.0.1 8125

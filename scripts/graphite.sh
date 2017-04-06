@@ -80,4 +80,8 @@ echo "test.count 100 `date +%s`" | nc -q0 127.0.0.1 2003
 
 #curl http://192.168.82.170:8080/render?target=test.count&format=json
 
+bash /vagrant/scripts/collectd.sh
+bash /vagrant/scripts/statsd.sh
+bash /vagrant/scripts/grafana.sh
+
 exit 0;
