@@ -8,8 +8,10 @@ echo "Reading config...." >&2
 source /vagrant/setup.rc
 
 sudo apt-get update
-sudo apt-get install graphite-web -y
-sudo DEBIAN_FRONTEND=noninteractive apt-get -q -y --force-yes install graphite-carbon
+
+echo "==========================================="
+echo " install postgres "
+echo "==========================================="
 sudo apt-get install postgresql -y
 sudo apt-get install libpq-dev -y
 sudo apt-get install python-psycopg2 -y
@@ -36,6 +38,11 @@ sudo psql -h localhost -U postgres -a -w -f /etc/postgresql/9.3/main/init.sql
 # graphite  | graphite | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
 # \q
 
+echo "==========================================="
+echo " install graphite "
+echo "==========================================="
+sudo apt-get install graphite-web -y
+sudo DEBIAN_FRONTEND=noninteractive apt-get -q -y --force-yes install graphite-carbon
 sudo cp -Rf /vagrant/resources/graphite/local_settings.py /etc/graphite/local_settings.py
 
 #SECRET_KEY = 'wkfgkwk'
@@ -51,10 +58,12 @@ sudo cp -Rf /vagrant/resources/graphite/local_settings.py /etc/graphite/local_se
 #    }
 #}
 
+echo "==========================================="
+echo " carbon setting "
+echo "==========================================="
 sudo graphite-manage syncdb --noinput
 
 sudo sed -i "s/CARBON_CACHE_ENABLED=false/CARBON_CACHE_ENABLED=true/g" /etc/default/graphite-carbon
-
 sudo sed -i "s/ENABLE_LOGROTATION = False/ENABLE_LOGROTATION = True/g" /etc/carbon/carbon.conf
 
 sudo cp -Rf /vagrant/resources/carbon/storage-schemas.conf /etc/carbon/storage-schemas.conf
@@ -66,19 +75,17 @@ sudo cp /usr/share/doc/graphite-carbon/examples/storage-aggregation.conf.example
 #sudo vi /etc/carbon/storage-aggregation.conf
 
 sudo service carbon-cache start
+
+echo "==========================================="
+echo " install apache "
+echo "==========================================="
 sudo apt-get install apache2 libapache2-mod-wsgi -y
 sudo a2dissite 000-default # disable default virtual host
 sudo cp /usr/share/graphite-web/apache2-graphite.conf /etc/apache2/sites-available
 sudo a2ensite apache2-graphite # enable virtual host
 sudo service apache2 reload
 
-echo "test.count 4 `date +%s`" | nc -q0 127.0.0.1 2003
-sleep 10
-echo "test.count 8 `date +%s`" | nc -q0 127.0.0.1 2003
-sleep 10
-echo "test.count 100 `date +%s`" | nc -q0 127.0.0.1 2003
-
-#curl http://192.168.82.170:8080/render?target=test.count&format=json
+#curl http://192.168.82.170:8080/render?target=test.count&from=-10min&format=json
 
 bash /vagrant/scripts/collectd.sh
 bash /vagrant/scripts/statsd.sh

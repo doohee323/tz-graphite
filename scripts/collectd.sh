@@ -7,7 +7,10 @@ export DEBIAN_FRONTEND=noninteractive
 echo "Reading config...." >&2
 source /vagrant/setup.rc
 
-sudo apt-get update
+echo "==========================================="
+echo " install collectd "
+echo "==========================================="
+
 sudo apt-get install collectd collectd-utils -y
 
 sudo cp -Rf /vagrant/resources/collectd/collectd.conf /etc/collectd/collectd.conf

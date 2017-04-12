@@ -7,7 +7,14 @@ export DEBIAN_FRONTEND=noninteractive
 echo "Reading config...." >&2
 source /vagrant/setup.rc
 
-sudo apt-get install build-essential graphite-web graphite-carbon python-dev apache2 libapache2-mod-wsgi libpq-dev python-psycopg2 -y
+sudo sh -c "echo '' >> /etc/hosts"
+sudo sh -c "echo '127.0.0.1    server.tz.com' >> /etc/hosts"
+
+echo "==========================================="
+echo " install grafana "
+echo "==========================================="
+
+sudo apt-get install build-essential python-dev libapache2-mod-wsgi libpq-dev python-psycopg2 -y
 
 sudo cp -Rf /vagrant/resources/apache2/ports.conf /etc/apache2/ports.conf
 sudo a2dissite 000‐default
@@ -32,16 +39,12 @@ sudo cp -Rf /vagrant/resources/apache2/sites-available/apache2-grafana.conf /etc
 sudo a2ensite apache2-grafana
 
 sudo update-rc.d grafana-server defaults 95 10
-sudo service grafana-server start 
+sudo service grafana-server start
+#sudo service grafana-server restart  
+sudo apt-get install -y adduser libfontconfig
 
+sudo sh -c "echo '' >> /etc/apache2/apache2.conf"
+sudo sh -c "echo 'ServerName localhost' >> /etc/apache2/apache2.conf"
 sudo service apache2 restart 
-
-#http://server.tz.com/datasources/new
-#Add data source
-#Name: graphite
-#Default: check
-#Url: http://server.tz.com:8080
-
-for i in 4 6 8 16 2; do echo "test.count $i `date +%s`" | nc -q0 127.0.0.1 2003; sleep 6; done 
 
 exit 0;

@@ -7,6 +7,9 @@ export DEBIAN_FRONTEND=noninteractive
 echo "Reading config...." >&2
 source /vagrant/setup.rc
 
+echo "==========================================="
+echo " install statsd "
+echo "==========================================="
 sudo apt-get install git nodejs devscripts debhelper -y
 sudo apt-get install nodejs -y
 sudo apt-get install nodejs-legacy -y
@@ -32,18 +35,6 @@ sudo service carbon-cache stop
 sudo service carbon-cache start
 
 sudo service statsd start
-
-#echo "metric_name:metric_value|type_specification" | nc -u -w0 127.0.0.1 8125
-echo "sample.gauge:16|g" | nc -u -w0 127.0.0.1 8125 
-echo "sample.gauge:10|g" | nc -u -w0 127.0.0.1 8125  
-echo "sample.gauge:18|g" | nc -u -w0 127.0.0.1 8125 
-echo "sample.gauge:18|g" | nc -u -w0 127.0.0.1 8125 
-
-echo "sample.set:50|s" | nc -u -w0 127.0.0.1 8125
-echo "sample.set:50|s" | nc -u -w0 127.0.0.1 8125
-echo "sample.set:50|s" | nc -u -w0 127.0.0.1 8125
-echo "sample.set:50|s" | nc -u -w0 127.0.0.1 8125
-echo "sample.set:11|s" | nc -u -w0 127.0.0.1 8125  
-echo "sample.set:11|s" | nc -u -w0 127.0.0.1 8125
+#sudo service statsd restart
 
 exit 0;
