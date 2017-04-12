@@ -1,5 +1,3 @@
-# http://blog.naver.com/PostView.nhn?blogId=sckim007&logNo=220668631882&parentCategoryNo=&categoryNo=&viewDate=&isShowPopularPosts=false&from=postView
-
 sudo su
 set -x
 export DEBIAN_FRONTEND=noninteractive
