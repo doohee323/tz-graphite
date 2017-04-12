@@ -21,7 +21,7 @@ sudo cp -Rf /vagrant/resources/postgresql/9.3/main/pg_hba.conf /etc/postgresql/9
 #host    all             all             ::1/128                 trust
 
 sudo cp -Rf /vagrant/resources/postgresql/9.3/main/init.sql /etc/postgresql/9.3/main/init.sql
-#CREATE USER graphite WITH PASSWORD 'wkfgkwk';
+#CREATE USER graphite WITH PASSWORD 'a_salty_string';
 #CREATE DATABASE graphite WITH OWNER graphite;
 
 sudo service postgresql restart
@@ -43,14 +43,14 @@ sudo apt-get install graphite-web -y
 sudo DEBIAN_FRONTEND=noninteractive apt-get -q -y --force-yes install graphite-carbon
 sudo cp -Rf /vagrant/resources/graphite/local_settings.py /etc/graphite/local_settings.py
 
-#SECRET_KEY = 'wkfgkwk'
+#SECRET_KEY = 'a_salty_string'
 #USE_REMOTE_USER_AUTHENTICATION = True
 #DATABASES = {
 #    'default': {
 #        'NAME': 'graphite',
 #        'ENGINE': 'django.db.backends.postgresql_psycopg2',
 #        'USER': 'graphite',
-#        'PASSWORD': 'wkfgkwk',
+#        'PASSWORD': 'a_salty_string',
 #        'HOST': '127.0.0.1',
 #        'PORT': ''
 #    }

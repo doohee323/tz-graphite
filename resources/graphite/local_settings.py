@@ -11,7 +11,7 @@
 # CRSF middleware, cookie storage, etc. This should be set identically among
 # instances if used behind a load balancer.
 #SECRET_KEY = 'UNSAFE_DEFAULT'
-SECRET_KEY = 'wkfgkwk'
+SECRET_KEY = 'a_salty_string'
 
 # In Django 1.5+ set this to the list of hosts your graphite instances is
 # accessible as. See:
@@ -154,7 +154,7 @@ DATABASES = {
         'NAME': 'graphite',
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'USER': 'graphite',
-        'PASSWORD': 'wkfgkwk',
+        'PASSWORD': 'a_salty_string',
         'HOST': '127.0.0.1',
         'PORT': ''
     }
