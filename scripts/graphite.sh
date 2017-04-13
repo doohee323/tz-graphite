@@ -81,6 +81,11 @@ sudo apt-get install apache2 libapache2-mod-wsgi -y
 sudo a2dissite 000-default # disable default virtual host
 sudo cp /usr/share/graphite-web/apache2-graphite.conf /etc/apache2/sites-available
 sudo a2ensite apache2-graphite # enable virtual host
+
+sudo sh -c "echo '' >> /etc/apache2/apache2.conf"
+sudo sh -c "echo 'ServerName localhost' >> /etc/apache2/apache2.conf"
+sudo service apache2 restart 
+
 sudo service apache2 reload
 
 #curl http://192.168.82.170:8080/render?target=test.count&from=-10min&format=json

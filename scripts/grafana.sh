@@ -41,8 +41,4 @@ sudo service grafana-server start
 #sudo service grafana-server restart  
 sudo apt-get install -y adduser libfontconfig
 
-sudo sh -c "echo '' >> /etc/apache2/apache2.conf"
-sudo sh -c "echo 'ServerName localhost' >> /etc/apache2/apache2.conf"
-sudo service apache2 restart 
-
 exit 0;
