@@ -18,7 +18,7 @@ sudo cp -Rf /vagrant/resources/apache2/sites-available/apache2-graphite.conf /et
 
 sudo service apache2 reload
 
-#curl http://192.168.82.170/server-status
+#curl http://192.168.82.171/server-status
 
 #/etc/carbon/storage-schemas.conf
 sudo service carbon-cache stop

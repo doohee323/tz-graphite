@@ -16,10 +16,10 @@ This is a Graphite server example on vagrant.
 # Run
 ```
 - graphite
-	http://192.168.82.170:8080
-	http://192.168.82.170:8080/render?target=test.count&from=-10min&format=json
+	http://192.168.82.171:8080
+	http://192.168.82.171:8080/render?target=test.count&from=-10min&format=json
 - grafana
-	http://192.168.82.170
+	http://192.168.82.171
 	admin / admin
 ```
 
@@ -29,7 +29,7 @@ This is a Graphite server example on vagrant.
 	Add data source
 	Name: graphite
 	Default: check
-	Url: http://192.168.82.170:8080
+	Url: http://192.168.82.171:8080
 ```
 
 # Test insert data
@@ -59,10 +59,10 @@ This is a Graphite server example on vagrant.
 	sleep 10
 	echo "test.count 100 `date +%s`" | nc -q0 127.0.0.1 2003
 	
-	http://192.168.82.170:8080
+	http://192.168.82.171:8080
 	
 	for i in 4 6 8 16 2; do echo "test.count $i `date +%s`" | nc -q0 127.0.0.1 2003; sleep 6; done
 	
-	http://192.168.82.170
+	http://192.168.82.171
 ```
 

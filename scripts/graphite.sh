@@ -88,7 +88,7 @@ sudo service apache2 restart
 
 sudo service apache2 reload
 
-#curl http://192.168.82.170:8080/render?target=test.count&from=-10min&format=json
+#curl http://192.168.82.171:8080/render?target=test.count&from=-10min&format=json
 
 bash /vagrant/scripts/collectd.sh
 bash /vagrant/scripts/statsd.sh
